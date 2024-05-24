@@ -1,5 +1,6 @@
 package com.kata.backpack.models;
 
+import com.kata.backpack.common.Error;
 import com.kata.backpack.enums.Category;
 import io.vavr.control.Either;
 
@@ -16,7 +17,6 @@ public class Bag {
     }
 
     public Either<Error, Bag> store(Item item) {
-        items.add(item);
         return Either.right(this);
     }
 
