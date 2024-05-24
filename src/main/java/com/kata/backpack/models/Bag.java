@@ -2,6 +2,7 @@ package com.kata.backpack.models;
 
 import com.kata.backpack.common.Error;
 import com.kata.backpack.enums.Category;
+import com.kata.backpack.errors.CannotStoreItem;
 import io.vavr.control.Either;
 
 import java.util.ArrayList;
@@ -12,12 +13,19 @@ public class Bag {
     private List<Item> items = new ArrayList<>();
     private Category category;
 
+    private final int BAG_LIMIT_CAPACITY = 4;
+
     public Bag(Category category) {
         this.category = category;
     }
 
     public Either<Error, Bag> store(Item item) {
-        return Either.right(this);
+
+        if (items.size() < BAG_LIMIT_CAPACITY) {
+            items.add(item);
+            return Either.right(this);
+        }
+        return Either.left(new CannotStoreItem("Cannot store more items, bag is full !!"));
     }
 
     public List<Item> getItems() {
