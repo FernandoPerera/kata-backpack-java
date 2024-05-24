@@ -16,7 +16,8 @@ public class Bag {
     }
 
     public Either<Error, Bag> store(Item item) {
-        throw new RuntimeException("Not implemented yet");
+        items.add(item);
+        return Either.right(this);
     }
 
     public List<Item> getItems() {
