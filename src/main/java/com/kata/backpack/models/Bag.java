@@ -21,7 +21,8 @@ public class Bag {
 
     public Either<Error, Bag> store(Item item) {
 
-        if (items.size() < BAG_LIMIT_CAPACITY) {
+        boolean bagIsNotFull = items.size() < BAG_LIMIT_CAPACITY;
+        if (bagIsNotFull) {
             items.add(item);
             return Either.right(this);
         }
