@@ -1,5 +1,6 @@
 package com.kata.backpack.models;
 
+import com.kata.backpack.common.Error;
 import io.vavr.control.Either;
 
 import java.util.ArrayList;
