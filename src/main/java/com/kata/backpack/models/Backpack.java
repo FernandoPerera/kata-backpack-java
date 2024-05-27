@@ -12,7 +12,8 @@ public class Backpack {
     public Backpack() {}
 
     public Either<Error, Backpack> store(Item item) {
-        throw new RuntimeException("Not implemented yet");
+        items.add(item);
+        return Either.right(this);
     }
 
     public List<Item> getItems() {
