@@ -17,6 +17,7 @@ class ItemOrganizerTest {
 
 
     private final int BACKPACK_LIMIT_CAPACITY = 8;
+    private final int BAG_LIMIT_CAPACITY = 4;
 
     @Nested
     class StoreUseCases {
@@ -66,7 +67,7 @@ class ItemOrganizerTest {
         void should_store_item_in_bag_if_backpack_is_full() {
             Item speedBoots = new Item("Speed Boots", Category.CLOTHES);
             Item leatherHat = new Item("Leather Hat", Category.CLOTHES);
-            fillBackpack(backpack, speedBoots);
+            fillContainer(itemOrganizer, speedBoots, BACKPACK_LIMIT_CAPACITY);
 
             itemOrganizer.store(leatherHat).fold(
                     error -> {
@@ -86,15 +87,46 @@ class ItemOrganizerTest {
             );
         }
 
+        @Test
+        void should_store_items_in_multiple_bags_if_first_bag_is_full() {
+            Item speedBoots = new Item("Speed Boots", Category.CLOTHES);
+            Item leatherHat = new Item("Leather Hat", Category.CLOTHES);
+            Item woodenArch = new Item("Wooden Arch", Category.WEAPON);
+            fillContainer(itemOrganizer, speedBoots, BACKPACK_LIMIT_CAPACITY);
+            fillContainer(itemOrganizer, leatherHat, BAG_LIMIT_CAPACITY);
+
+            itemOrganizer.store(woodenArch).fold(
+                    error -> {
+                        assertNull(error);
+                        return null;
+                    },
+                    itemOrganizerSuccess -> {
+                        assertEquals(
+                                itemOrganizerSuccess.getBackpackItems().stream().filter(
+                                        item -> item.equals(speedBoots)
+                                ).count(),
+                                BACKPACK_LIMIT_CAPACITY
+                        );
+                        assertTrue(itemOrganizerSuccess.getBags().stream().anyMatch(
+                                bag -> bag.getItems().stream().allMatch(item -> item.equals(leatherHat))
+                        ));
+                        assertTrue(itemOrganizerSuccess.getBags().stream().anyMatch(
+                                bag -> bag.getItems().contains(woodenArch)
+                        ));
+                        return itemOrganizerSuccess;
+                    }
+            );
+        }
+
     }
 
-    private void fillBackpack(Backpack backpack, Item item) {
+    private void fillContainer(ItemOrganizer itemOrganizer, Item item, int limit) {
         List<Item> items = new ArrayList<>();
-        for (int i = 0; i < BACKPACK_LIMIT_CAPACITY; i++) {
+        for (int i = 0; i < limit; i++) {
             items.add(item);
         }
 
-        items.forEach(currentItem -> backpack.store(item));
+        items.forEach(currentItem -> itemOrganizer.store(item));
     }
 
 }
