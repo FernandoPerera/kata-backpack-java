@@ -1,6 +1,7 @@
 package com.kata.backpack.useCase;
 
 import com.kata.backpack.enums.Category;
+import com.kata.backpack.errors.NoSpaceAvailable;
 import com.kata.backpack.models.Backpack;
 import com.kata.backpack.models.Bag;
 import com.kata.backpack.models.Item;
@@ -27,7 +28,7 @@ class ItemOrganizerTest {
          *   store(ninthItem) -> store items in backpack to the limit, and another one in first bag
          *   store(thirteenthItem) -> store items in backpack to the limit, and rest in multiple bags
          *   store(twentyFifthItem) -> store items in backpack to the limit, the rest store in
-         *                             multiple bags to the limit, and return AllBagsAreFull error
+         *                             multiple bags to the limit, and return NoSpaceAvailable error
          */
 
         private Backpack backpack;
@@ -40,9 +41,7 @@ class ItemOrganizerTest {
             backpack = new Backpack();
             bags = List.of(
                     new Bag(Category.CLOTHES),
-                    new Bag(Category.UNKNOWN),
-                    new Bag(Category.WEAPON),
-                    new Bag(Category.WEAPON)
+                    new Bag(Category.UNKNOWN)
             );
             itemOrganizer = ItemOrganizer.of(backpack, bags);
         }
@@ -112,6 +111,45 @@ class ItemOrganizerTest {
                         ));
                         assertTrue(itemOrganizerSuccess.getBags().stream().anyMatch(
                                 bag -> bag.getItems().contains(woodenArch)
+                        ));
+                        return itemOrganizerSuccess;
+                    }
+            );
+        }
+
+        @Test
+        void should_not_allow_to_store_more_items_if_no_more_capacity_is_available() {
+            Item speedBoots = new Item("Speed Boots", Category.CLOTHES);
+            Item leatherHat = new Item("Leather Hat", Category.CLOTHES);
+            Item woodenArch = new Item("Wooden Arch", Category.WEAPON);
+            Item strangerStone = new Item("Stranger Stone", Category.UNKNOWN);
+            fillContainer(itemOrganizer, speedBoots, BACKPACK_LIMIT_CAPACITY);
+            fillContainer(itemOrganizer, leatherHat, BAG_LIMIT_CAPACITY);
+            fillContainer(itemOrganizer, woodenArch, BAG_LIMIT_CAPACITY);
+
+            itemOrganizer.store(strangerStone).fold(
+                    error -> {
+                        assertInstanceOf(NoSpaceAvailable.class, error);
+                        return null;
+                    },
+                    itemOrganizerSuccess -> {
+                        assertEquals(
+                                itemOrganizerSuccess.getBackpackItems().stream().filter(
+                                        item -> item.equals(speedBoots)
+                                ).count(),
+                                BACKPACK_LIMIT_CAPACITY
+                        );
+                        assertTrue(itemOrganizerSuccess.getBags().stream().anyMatch(
+                                bag -> bag.getItems().stream().allMatch(item -> item.equals(leatherHat))
+                        ));
+                        assertTrue(itemOrganizerSuccess.getBags().stream().anyMatch(
+                                bag -> bag.getItems().stream().allMatch(item -> item.equals(woodenArch))
+                        ));
+                        assertTrue(itemOrganizerSuccess.getBackpackItems().stream().noneMatch(
+                                item -> item.equals(strangerStone)
+                        ));
+                        assertTrue(itemOrganizerSuccess.getBags().stream().allMatch(
+                                bag -> bag.getItems().stream().noneMatch(item -> item.equals(strangerStone))
                         ));
                         return itemOrganizerSuccess;
                     }
