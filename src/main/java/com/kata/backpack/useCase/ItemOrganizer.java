@@ -1,6 +1,7 @@
 package com.kata.backpack.useCase;
 
 import com.kata.backpack.common.Error;
+import com.kata.backpack.errors.NoSpaceAvailable;
 import com.kata.backpack.models.Backpack;
 import com.kata.backpack.models.Bag;
 import com.kata.backpack.models.Item;
@@ -10,8 +11,8 @@ import java.util.List;
 
 public class ItemOrganizer {
 
-    private Backpack backpack;
-    private List<Bag> bags;
+    private final Backpack backpack;
+    private final List<Bag> bags;
 
     private ItemOrganizer(Backpack backpack, List<Bag> bags) {
         this.backpack = backpack;
@@ -25,8 +26,10 @@ public class ItemOrganizer {
     public Either<Error, ItemOrganizer> store(Item item) {
         return backpack.store(item).fold(
                 backpackError -> {
-                    this.getBags().stream().anyMatch((bag) -> bag.store(item).isRight());
-                    return Either.right(this);
+                    boolean areSomeBagAvailable = this.getBags().stream().anyMatch((bag) -> bag.store(item).isRight());
+                    return areSomeBagAvailable
+                            ? Either.right(this)
+                            : Either.left(new NoSpaceAvailable("No hay mas espacio disponible !!"));
                 },
                 backpackSuccess -> Either.right(this)
         );
