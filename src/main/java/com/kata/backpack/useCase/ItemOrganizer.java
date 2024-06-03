@@ -25,7 +25,7 @@ public class ItemOrganizer {
     public Either<Error, ItemOrganizer> store(Item item) {
         return backpack.store(item).fold(
                 backpackError -> {
-                    this.getBags().getFirst().store(item);
+                    this.getBags().stream().anyMatch((bag) -> bag.store(item).isRight());
                     return Either.right(this);
                 },
                 backpackSuccess -> Either.right(this)
