@@ -23,7 +23,8 @@ public class ItemOrganizer {
     }
 
     public Either<Error, ItemOrganizer> store(Item item) {
-        throw new RuntimeException("Not implemented yet");
+        backpack.store(item);
+        return Either.right(this);
     }
 
     public List<Item> getBackpackItems() {
