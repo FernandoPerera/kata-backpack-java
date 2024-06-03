@@ -23,8 +23,13 @@ public class ItemOrganizer {
     }
 
     public Either<Error, ItemOrganizer> store(Item item) {
-        backpack.store(item);
-        return Either.right(this);
+        return backpack.store(item).fold(
+                backpackError -> {
+                    this.getBags().getFirst().store(item);
+                    return Either.right(this);
+                },
+                backpackSuccess -> Either.right(this)
+        );
     }
 
     public List<Item> getBackpackItems() {
