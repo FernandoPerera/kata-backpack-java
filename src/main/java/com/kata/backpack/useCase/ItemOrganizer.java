@@ -30,5 +30,7 @@ public class ItemOrganizer {
     public List<Item> getBackpackItems() {
         return this.backpack.getItems();
     }
-
+    public List<Bag> getBags() {
+        return this.bags;
+    }
 }

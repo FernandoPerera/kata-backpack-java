@@ -8,12 +8,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class ItemOrganizerTest {
 
+
+    private final int BACKPACK_LIMIT_CAPACITY = 8;
 
     @Nested
     class StoreUseCases {
@@ -59,6 +62,39 @@ class ItemOrganizerTest {
             );
         }
 
+        @Test
+        void should_store_item_in_bag_if_backpack_is_full() {
+            Item speedBoots = new Item("Speed Boots", Category.CLOTHES);
+            Item leatherHat = new Item("Leather Hat", Category.CLOTHES);
+            fillBackpack(backpack, speedBoots);
+
+            itemOrganizer.store(leatherHat).fold(
+                    error -> {
+                        assertNull(error);
+                        return null;
+                    },
+                    itemOrganizerSuccess -> {
+                        assertEquals(
+                                itemOrganizerSuccess.getBackpackItems().stream().filter(
+                                        item -> item.equals(speedBoots)
+                                ).count(),
+                                BACKPACK_LIMIT_CAPACITY
+                        );
+                        assertTrue(itemOrganizerSuccess.getBags().getFirst().getItems().contains(leatherHat));
+                        return itemOrganizerSuccess;
+                    }
+            );
+        }
+
+    }
+
+    private void fillBackpack(Backpack backpack, Item item) {
+        List<Item> items = new ArrayList<>();
+        for (int i = 0; i < BACKPACK_LIMIT_CAPACITY; i++) {
+            items.add(item);
+        }
+
+        items.forEach(currentItem -> backpack.store(item));
     }
 
 }
